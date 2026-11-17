@@ -94,8 +94,17 @@ async function sendAllImages(senderId) {
 }
 
 app.get('/', (req, res) => res.send('Bot ทำงานอยู่ครับ'));
-app.get('/privacy', (req, res) => {
-  res.send(`<h1>Privacy Policy</h1><p>เราเก็บข้อมูลแชทเพื่อตอบคำถามและจัดส่งสินค้าเท่านั้น ไม่ขายข้อมูลให้ใคร</p>`);
+
+app.get(['/privacy', '/privacy/'], (req, res) => {
+  res.send(`
+    <h1>Privacy Policy - Phathung Bot</h1>
+    <p>เราเก็บข้อมูลแชท เช่น ชื่อ และข้อความ เพื่อใช้ตอบคำถามและจัดส่งสินค้าเท่านั้น ไม่ขายข้อมูลให้ใคร</p>
+    <h2>การลบข้อมูล / Data Deletion</h2>
+    <p>หากต้องการลบข้อมูลแชททั้งหมด สามารถทำได้ 2 วิธี:</p>
+    <p>1. ทัก inbox มาที่เพจ แล้วพิมพ์ว่า ขอลบข้อมูล</p>
+    <p>2. ส่งอีเมลมาที่ tonyethanroiet@outlook.co.th โดยระบุ Facebook ID ของคุณ</p>
+    <p>เราจะลบข้อมูลของคุณภายใน 7 วัน และแจ้งกลับเมื่อลบเสร็จ</p>
+  `);
 });
 
 app.get('/webhook', (req, res) => {

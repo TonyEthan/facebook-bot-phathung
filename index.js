@@ -8,11 +8,7 @@ const PORT = process.env.PORT || 10000;
 
 const processedMids = new Set();
 
-const MSG1 = `ผ้าถุง ราคาส่งผืนละ 23.-💥
-เย็บพร้อมนุ่ง ✅
-ไม่ลื่น ไม่มัน สีไม่ตก💯💯
-#กว้าง 2 หลา ยาว 115 ซม.
-
+const MSG1 = `▶ผ้าถุงเย็บพร้อมนุ่ง
 10 ผืน 239 ค่าส่ง 50
 รวมส่ง 289.-✅
 
@@ -20,17 +16,7 @@ const MSG1 = `ผ้าถุง ราคาส่งผืนละ 23.-💥
 รวมส่ง 528.-✅
 
 100 ผืน 2390.-ส่งฟรี💥💥
-💢ปลายทางไม่บวกเพิ่ม 💢
-
-ด่วน ❗❗ สินค้ามีจำนวนจำกัด`;
-
-const MSG2 = `💥💥 ผ้าถุง ทางร้านมี 4 ลายค่ะ
-💚ลายดอก  💚 ไทย
-💚 ลายนกยูง 💚 ไทยมีเชิง
-
-ลูกค้ารับลายไหนจ้ะ❤🥰`;
-
-const MSG3 = `คุณพี่รับกี่ผืนดีจ้ะ😘`;
+💢ปลายทางไม่บวกเพิ่ม 💢`;
 
 // รูป 10 รูป ส่งทีละรูปตามลำดับ
 const IMAGE_FILES = [
@@ -135,14 +121,10 @@ async function handleEvent(event) {
   console.log('Received:', msg || (isPostback ? '[กดปุ่ม]' : '[ส่งรูปมา]'));
 
   try {
-    // ไม่จำแล้ว ตอบทุกครั้งที่ทักมา
+    // ตอบทุกครั้ง ไม่จำ 48 ชม. แล้ว ส่งแค่ข้อความก้อนเดียว
     await sendAllImages(senderId);
     await sendMessage(senderId, MSG1);
-    await delay(400);
-    await sendMessage(senderId, MSG2);
-    await delay(400);
-    await sendMessage(senderId, MSG3);
-    console.log('Welcome sent');
+    console.log('Sent 1 message');
   } catch (e) {
     console.log('handleEvent error:', e.message);
   }

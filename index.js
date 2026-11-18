@@ -4,7 +4,11 @@ app.use(express.json());
 
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'MyBotToken2024';
+const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
+const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 const PORT = process.env.PORT || 10000;
+const MEMORY_SECONDS = 172800; // 48 ชม.
+const BOT_KEY = process.env.BOT_KEY || ''; // เพจผ้าถุงไม่ต้องใส่ เพจที่ 2 ใส่ชื่อเพจ เช่น pajama
 
 const processedMids = new Set();
 
@@ -60,6 +64,24 @@ const PANT_FILES = [
 const PANT_IMAGES = PANT_FILES.map(f => `https://raw.githubusercontent.com/TonyEthan/facebook-bot-phathung/main/${f}`);
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function upstashGet(key) {
+  try {
+    const res = await fetch(`${UPSTASH_URL}/get/${key}`, {
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+    });
+    const data = await res.json();
+    return data.result;
+  } catch (e) { console.log('Upstash get error:', e.message); return null; }
+}
+
+async function upstashSet(key, value) {
+  try {
+    await fetch(`${UPSTASH_URL}/set/${key}/${value}?EX=${MEMORY_SECONDS}`, {
+      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
+    });
+  } catch (e) { console.log('Upstash set error:', e.message); }
+}
 
 async function sendMessage(senderId, text) {
   try {
@@ -147,6 +169,16 @@ async function handleEvent(event) {
   console.log('Received:', msg || (isPostback ? '[กดปุ่ม]' : '[ส่งรูปมา]'));
 
   try {
+    // จำ 48 ชม. แยกตามเพจด้วย BOT_KEY
+    const key = BOT_KEY ? `welcomed:${BOT_KEY}:${senderId}` : `welcomed:${senderId}`;
+    const already = await upstashGet(key);
+    if (already) {
+      console.log('Already welcomed within 48h, skip - let admin reply');
+      return;
+    }
+
+    await upstashSet(key, '1');
+
     // ชุดที่ 1 : ผ้าถุง
     await sendImages(senderId, IMAGES);
     await sendMessage(senderId, MSG1);
@@ -158,7 +190,7 @@ async function handleEvent(event) {
     await delay(500);
     await sendMessage(senderId, MSG_PANT2);
 
-    console.log('Sent all');
+    console.log('Welcome sent, waiting for admin');
   } catch (e) {
     console.log('handleEvent error:', e.message);
   }

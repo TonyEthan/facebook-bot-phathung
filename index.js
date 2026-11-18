@@ -16,9 +16,25 @@ const MSG1 = `▶ผ้าถุงเย็บพร้อมนุ่ง
 รวมส่ง 528.-✅
 
 100 ผืน 2390.-ส่งฟรี💥💥
-💢ปลายทางไม่บวกเพิ่ม`;
+💢ปลายทางไม่บวกเพิ่ม 💢`;
 
-// รูป 10 รูป ส่งทีละรูปตามลำดับ
+const MSG_PANT1 = `กางเกงขาสั้น ลายดอก
+💙ขนาด ฟรีไซส์ 
+ผ้าคอตตอนผสมโพลีเอสเทอร์
+
+▶3 ตัว 117+ค่าส่ง 39 =156.-
+
+▶6 ตัว 39×6=234.-ส่งฟรี💥
+
+▶10 ตัว แถม 1 ตัว 💥
+ 390.-ส่งฟรี (ขายดี💢💢)
+ส่งฟรีปลายทางไม่บวกเพิ่ม❗❗`;
+
+const MSG_PANT2 = `ลูกค้ารับกางเกงกี่ตัว ❤
+
+หรือ ลูกค้าสนใจผ้าถุงนะจ้ะ🥰`;
+
+// รูปผ้าถุง 10 รูป
 const IMAGE_FILES = [
   'thaistyle.jpg',
   'thaipattern.jpg',
@@ -32,6 +48,16 @@ const IMAGE_FILES = [
   'peacockk2.jpg'
 ];
 const IMAGES = IMAGE_FILES.map(f => `https://raw.githubusercontent.com/TonyEthan/facebook-bot-phathung/main/${f}`);
+
+// รูป กางเกง 5 รูป
+const PANT_FILES = [
+  'pant1.jpg',
+  'pant2.jpg',
+  'pant3.jpg',
+  'pant4.jpg',
+  'pant5.jpg'
+];
+const PANT_IMAGES = PANT_FILES.map(f => `https://raw.githubusercontent.com/TonyEthan/facebook-bot-phathung/main/${f}`);
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -61,8 +87,8 @@ async function sendImage(senderId, imageUrl) {
   } catch (e) { console.log('SendImage error:', e.message); return null; }
 }
 
-async function sendAllImages(senderId) {
-  for (const url of IMAGES) {
+async function sendImages(senderId, images) {
+  for (const url of images) {
     await sendImage(senderId, url);
     await delay(600);
   }
@@ -121,10 +147,18 @@ async function handleEvent(event) {
   console.log('Received:', msg || (isPostback ? '[กดปุ่ม]' : '[ส่งรูปมา]'));
 
   try {
-    // ตอบทุกครั้ง ไม่จำ 48 ชม. แล้ว ส่งแค่ข้อความก้อนเดียว
-    await sendAllImages(senderId);
+    // ชุดที่ 1 : ผ้าถุง
+    await sendImages(senderId, IMAGES);
     await sendMessage(senderId, MSG1);
-    console.log('Sent 1 message');
+    await delay(500);
+
+    // ชุดที่ 2 : กางเกง
+    await sendImages(senderId, PANT_IMAGES);
+    await sendMessage(senderId, MSG_PANT1);
+    await delay(500);
+    await sendMessage(senderId, MSG_PANT2);
+
+    console.log('Sent all');
   } catch (e) {
     console.log('handleEvent error:', e.message);
   }

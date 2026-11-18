@@ -1,13 +1,13 @@
-const express = require('express');
-const app = express();
-app.use(express.json());
+const 【entity-express¦canonical_name=express】 = require('【entity-express¦canonical_name=express】');
+const app = 【entity-express¦canonical_name=express】();
+app.use(【entity-express¦canonical_name=express】.json());
 
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'MyBotToken2024';
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 const PORT = process.env.PORT || 10000;
-const MEMORY_SECONDS = 172800; // 48 ชม.
+const MEMORY_SECONDS = 172800; // 48 ชม. นับจากข้อความล่าสุดของลูกค้า
 const BOT_KEY = process.env.BOT_KEY || ''; // เพจผ้าถุงไม่ต้องใส่ เพจที่ 2 ใส่ชื่อเพจ เช่น pajama
 
 const processedMids = new Set();
@@ -169,11 +169,13 @@ async function handleEvent(event) {
   console.log('Received:', msg || (isPostback ? '[กดปุ่ม]' : '[ส่งรูปมา]'));
 
   try {
-    // จำ 48 ชม. แยกตามเพจด้วย BOT_KEY
+    // จำ 48 ชม. นับจากข้อความล่าสุดของลูกค้า แยกตามเพจด้วย BOT_KEY
     const key = BOT_KEY ? `welcomed:${BOT_KEY}:${senderId}` : `welcomed:${senderId}`;
     const already = await upstashGet(key);
     if (already) {
-      console.log('Already welcomed within 48h, skip - let admin reply');
+      // เคยส่งแล้ว ต่อเวลา 48 ชม. ใหม่ทุกครั้งที่ลูกค้าพิมพ์ แล้วปล่อยให้แอดมินตอบ
+      await upstashSet(key, '1');
+      console.log('Already welcomed, refresh 48h from last message - let admin reply');
       return;
     }
 

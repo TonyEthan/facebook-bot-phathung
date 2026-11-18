@@ -4,34 +4,31 @@ app.use(express.json());
 
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'MyBotToken2024';
-const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
-const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 const PORT = process.env.PORT || 10000;
-const MEMORY_SECONDS = 172800; // 48 ชม.
 
 const processedMids = new Set();
 
 const MSG1 = `ผ้าถุง ราคาส่งผืนละ 23.-💥
-เย็บพร้อมนุ่ง ✅️
+เย็บพร้อมนุ่ง ✅
 ไม่ลื่น ไม่มัน สีไม่ตก💯💯
 #กว้าง 2 หลา ยาว 115 ซม.
 
 10 ผืน 239 ค่าส่ง 50
-รวมส่ง 289.-✅️
+รวมส่ง 289.-✅
 
 20 ผืน 478.-ค่าส่ง50
-รวมส่ง 528.-✅️
+รวมส่ง 528.-✅
 
 100 ผืน 2390.-ส่งฟรี💥💥
 💢ปลายทางไม่บวกเพิ่ม 💢
 
-ด่วน ❗️❗️ สินค้ามีจำนวนจำกัด`;
+ด่วน ❗❗ สินค้ามีจำนวนจำกัด`;
 
 const MSG2 = `💥💥 ผ้าถุง ทางร้านมี 4 ลายค่ะ
 💚ลายดอก  💚 ไทย
 💚 ลายนกยูง 💚 ไทยมีเชิง
 
-ลูกค้ารับลายไหนจ้ะ❤️🥰`;
+ลูกค้ารับลายไหนจ้ะ❤🥰`;
 
 const MSG3 = `คุณพี่รับกี่ผืนดีจ้ะ😘`;
 
@@ -51,24 +48,6 @@ const IMAGE_FILES = [
 const IMAGES = IMAGE_FILES.map(f => `https://raw.githubusercontent.com/TonyEthan/facebook-bot-phathung/main/${f}`);
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-async function upstashGet(key) {
-  try {
-    const res = await fetch(`${UPSTASH_URL}/get/${key}`, {
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-    });
-    const data = await res.json();
-    return data.result;
-  } catch (e) { console.log('Upstash get error:', e.message); return null; }
-}
-
-async function upstashSet(key, value) {
-  try {
-    await fetch(`${UPSTASH_URL}/set/${key}/${value}?EX=${MEMORY_SECONDS}`, {
-      headers: { Authorization: `Bearer ${UPSTASH_TOKEN}` }
-    });
-  } catch (e) { console.log('Upstash set error:', e.message); }
-}
 
 async function sendMessage(senderId, text) {
   try {
@@ -152,26 +131,18 @@ async function handleEvent(event) {
     if (processedMids.size > 500) processedMids.clear();
   }
 
-  // แก้ตรงนี้ครับ - ตอบเมื่อส่งอะไรมาก็ได้ เหมือนบอทชุดนอน
-  // ถ้าไม่มีทั้งข้อความ และไม่มีทั้งรูป และไม่ได้กดปุ่ม ถึงจะไม่ตอบ
   if (!msg && !hasAttachment && !isPostback) return;
   console.log('Received:', msg || (isPostback ? '[กดปุ่ม]' : '[ส่งรูปมา]'));
 
   try {
-    // จำ 48 ชม. ด้วย Upstash
-    const key = `welcomed:${senderId}`;
-    const already = await upstashGet(key);
-    if (already) {
-      console.log('Already welcomed within 48h, skip - let admin reply');
-      return;
-    }
-
-    await upstashSet(key, '1');
+    // ไม่จำแล้ว ตอบทุกครั้งที่ทักมา
     await sendAllImages(senderId);
     await sendMessage(senderId, MSG1);
+    await delay(400);
     await sendMessage(senderId, MSG2);
+    await delay(400);
     await sendMessage(senderId, MSG3);
-    console.log('Welcome sent, waiting for admin');
+    console.log('Welcome sent');
   } catch (e) {
     console.log('handleEvent error:', e.message);
   }

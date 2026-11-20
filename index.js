@@ -7,7 +7,7 @@ const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'MyBotToken2024';
 const UPSTASH_URL = process.env.UPSTASH_REDIS_REST_URL;
 const UPSTASH_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN;
 const PORT = process.env.PORT || 10000;
-const MEMORY_SECONDS = 172800; // 48 ชม. นับจากข้อความล่าสุดของลูกค้า
+const MEMORY_SECONDS = 259200; // 72 ชม. นับจากข้อความล่าสุดของลูกค้า
 const BOT_KEY = process.env.BOT_KEY || ''; // เพจผ้าถุงไม่ต้องใส่ เพจที่ 2 ใส่ชื่อเพจ เช่น pajama
 
 const processedMids = new Set();
@@ -169,13 +169,13 @@ async function handleEvent(event) {
   console.log('Received:', msg || (isPostback ? '[กดปุ่ม]' : '[ส่งรูปมา]'));
 
   try {
-    // จำ 48 ชม. นับจากข้อความล่าสุดของลูกค้า แยกตามเพจด้วย BOT_KEY
+    // จำ 72 ชม. นับจากข้อความล่าสุดของลูกค้า แยกตามเพจด้วย BOT_KEY
     const key = BOT_KEY ? `welcomed:${BOT_KEY}:${senderId}` : `welcomed:${senderId}`;
     const already = await upstashGet(key);
     if (already) {
-      // เคยส่งแล้ว ต่อเวลา 48 ชม. ใหม่ทุกครั้งที่ลูกค้าพิมพ์ แล้วปล่อยให้แอดมินตอบ
+      // เคยส่งแล้ว ต่อเวลา 72 ชม. ใหม่ทุกครั้งที่ลูกค้าพิมพ์ แล้วปล่อยให้แอดมินตอบ
       await upstashSet(key, '1');
-      console.log('Already welcomed, refresh 48h from last message - let admin reply');
+      console.log('Already welcomed, refresh 72h from last message - let admin reply');
       return;
     }
 

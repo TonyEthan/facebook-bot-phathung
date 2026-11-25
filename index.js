@@ -34,7 +34,13 @@ const MSG_PANT1 = `กางเกงขาสั้น ลายดอก
  390.-ส่งฟรี (ขายดี💢💢)
 ส่งฟรีปลายทางไม่บวกเพิ่ม❗❗`;
 
-const MSG_PANT2 = `ลูกค้ารับกางเกงกี่ตัว ❤
+const MSG_PANT2 = `มี 8 สีตามรูป ระบุสีได้จ้า✅
+
+❤แดง  ❤ ฟ้า
+❤ เขียว  ❤ น้ำเงิน ❤ ม่วง
+❤  ชมพู  ❤เหลือง ❤ดำ`;
+
+const MSG_PANT3 = `ลูกค้ารับกางเกงกี่ตัว ❤
 
 หรือ ลูกค้าสนใจผ้าถุงนะจ้ะ🥰`;
 
@@ -186,11 +192,13 @@ async function handleEvent(event) {
     await sendMessage(senderId, MSG1);
     await delay(500);
 
-    // ชุดที่ 2 : กางเกง
+    // ชุดที่ 2 : กางเกง ส่ง 3 ก้อน
     await sendImages(senderId, PANT_IMAGES);
     await sendMessage(senderId, MSG_PANT1);
     await delay(500);
     await sendMessage(senderId, MSG_PANT2);
+    await delay(500);
+    await sendMessage(senderId, MSG_PANT3);
 
     console.log('Welcome sent, waiting for admin');
   } catch (e) {
